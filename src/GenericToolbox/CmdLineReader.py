@@ -4,7 +4,7 @@
 import sys
 
 
-class CommandLineReader:
+class CmdLineReader:
     def __init__(self):
         self.optionsBuffer = dict()
         self.keepTailArgs = False

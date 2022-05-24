@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Colors strings
+# Color strings
 
 resetColor = "\033[00m"
 goldColor = "\033[1;33m"

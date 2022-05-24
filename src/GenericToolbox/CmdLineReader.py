@@ -8,6 +8,7 @@ class CommandLineReader:
     def __init__(self):
         self.optionsBuffer = dict()
         self.keepTailArgs = False
+        self.trailArgList = list()
 
     def addOption(self, optionName_, callList_, description_="", nbExpectedArgs_=-1, possibleValueList_=None,
                   isMandatory_=False):
@@ -54,6 +55,7 @@ class CommandLineReader:
                         raise ValueError("Too many options provided")
                     else:
                         print("Tail catcher triggered...")
+                        self.trailArgList.append(arg)
                         lastOptionName = ""
                         self.optionsBuffer[lastOptionName]["isTriggered"] = True
                         self.optionsBuffer[lastOptionName]["values"].append(arg)

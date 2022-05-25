@@ -77,3 +77,8 @@ class CmdLineReader:
 
     def getOptionValues(self, optionName_):
         return self.optionsBuffer[optionName_]["values"]
+
+    def getOptionValue(self, optionName_, default_):
+        if optionName_ in self.optionsBuffer:
+            default_ = self.optionsBuffer[optionName_]["values"]
+        return default_

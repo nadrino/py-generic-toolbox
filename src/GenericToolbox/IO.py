@@ -19,7 +19,6 @@ def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', k
 
     return files_list
 
-
 def splitFileNameAndFolderPath(filePath_):
     import os
 
@@ -34,7 +33,6 @@ def splitFileNameAndFolderPath(filePath_):
 
     return folder_path, file_name
 
-
 def mkdir(directory_path):
     import os
 
@@ -47,14 +45,12 @@ def mkdir(directory_path):
         if parent and not os.path.isdir(parent): mkdir(parent)
         if directory: os.mkdir(directory_path)
 
-
 def ls(input_path_):
     import os
 
     if input_path_[0] != '/':
         input_path_ = os.getcwd() + '/' + input_path_
     return os.popen('cd ' + os.getcwd() + ' && ls ' + input_path_).read().split('\n')[:-1]
-
 
 def get_list_of_files_in_folder(input_folder_, extension_='', name_format_=''):
     import os
@@ -71,11 +67,9 @@ def get_list_of_files_in_folder(input_folder_, extension_='', name_format_=''):
 
     return files_list
 
-
 def getNowTimeString():
     import time
     return time.strftime("%Y%m%d_%H%M%S", time.gmtime())
-
 
 def transcriptAudio(wav_file_path_, algorithm_='google'):
     import speech_recognition as sr
@@ -101,11 +95,9 @@ def transcriptAudio(wav_file_path_, algorithm_='google'):
             except sr.RequestError as e:
                 print('Sphinx error: {0}'.format(str(e)))
 
-
 def isEnvVarDefined(env_variable_):
     import os
     return (env_variable_ in os.environ)
-
 
 def get_env_variable(env_variable_):
     if not isEnvVarDefined(env_variable_):
@@ -115,7 +107,6 @@ def get_env_variable(env_variable_):
     else:
         import os
         return os.environ.get(env_variable_)
-
 
 def get_current_os():
     import os
@@ -131,7 +122,6 @@ def get_current_os():
         current_os = "cl7"
 
     return current_os
-
 
 def getTerminalSize():
     import os
@@ -163,3 +153,101 @@ def getTerminalSize():
         # except:
         #    cr = (25, 80)
     return int(cr[1]), int(cr[0])
+
+def select_in_xml(root_, result_types_, result_leaf_conditions_list_, branch_conditions_list_):
+    # result_type_ = \
+    #     [
+    #         "",
+    #         "strref"
+    #     ]
+    # result_leaf_conditions_list = \
+    #     [
+    #         [
+    #             {"type": 'label', "value": 'OpenLockDC'}
+    #         ],[
+    #             {"type": 'label', "value": 'LocName'}
+    #         ]
+    #     ]
+    # branch_conditions_list = \
+    #     [
+    #         [
+    #             {"type": 'label', "value": 'Locked'},
+    #             {"type": '', "value": '1'},
+    #         ],[
+    #             {"type": 'label', "value": "ItemList"}
+    #         ]
+    #     ]
+
+    global is_result_branch
+    is_result_branch = False
+    global result_value
+    result_value = list()
+    results_list = list()
+    for result_index in range(len(result_types_)):
+        result_value.append("")
+
+    def recur_branches(branch_, branch_conditions_trigger_=list()):
+
+        global is_result_branch
+        global result_value
+
+        # Default case (first branch loop)
+        if branch_conditions_trigger_ == list():
+            for branch_condition in branch_conditions_list_:
+                branch_conditions_trigger_.append(False)
+
+        # fill the branch_conditions_trigger_ (shared in the branch)
+        for leaf_index in range(len(branch_conditions_list_)):
+            if not branch_conditions_trigger_[leaf_index]:
+                all_inner_leaf_conditions_fulfilled = True
+                for leaf_condition_index in range(len(branch_conditions_list_[leaf_index])):
+                    attrib_type = branch_conditions_list_[leaf_index][leaf_condition_index]['type']
+                    attrib_value = branch_conditions_list_[leaf_index][leaf_condition_index]['value']
+                    if attrib_type == '':
+                        if attrib_value != branch_.text:
+                            all_inner_leaf_conditions_fulfilled = False
+                    else:
+                        if attrib_type not in branch_.attrib:
+                            all_inner_leaf_conditions_fulfilled = False
+                        elif attrib_value != branch_.attrib[attrib_type]:
+                            all_inner_leaf_conditions_fulfilled = False
+                if all_inner_leaf_conditions_fulfilled:
+                    branch_conditions_trigger_[leaf_index] = True
+
+        # if all condition has been met, then it is the right branch
+        if False not in branch_conditions_trigger_ and len(branch_conditions_trigger_) != 0:
+            is_result_branch = True
+
+        for result_leaf_index in range(len(result_types_)):
+
+            is_result_leaf = False
+            for result_condition in result_leaf_conditions_list_[result_leaf_index]:
+                if result_condition['type'] == '':
+                    if result_condition['value'] == branch_.text:
+                        is_result_leaf = True
+                else:
+                    if result_condition['type'] in branch_.attrib:
+                        if result_condition['value'] == branch_.attrib[result_condition['type']]:
+                            is_result_leaf = True
+
+            if is_result_leaf:
+                if result_types_[result_leaf_index] == '':
+                    result_value[result_leaf_index] = branch_.text
+                else:
+                    result_value[result_leaf_index] = branch_.attrib[result_types_[result_leaf_index]]
+
+        if not is_result_branch \
+                or True: # continue looping if it's not the result_branch
+            branch_conditions_trigger = list() # sub-branch conditions
+            for branch_condition in branch_conditions_list_:
+                branch_conditions_trigger.append(False)
+
+            for elem in list(branch_):
+                recur_branches(elem, branch_conditions_trigger)
+
+    recur_branches(root_)
+
+    if is_result_branch or len(branch_conditions_list_) == 0:
+        return result_value
+    else:
+        return None

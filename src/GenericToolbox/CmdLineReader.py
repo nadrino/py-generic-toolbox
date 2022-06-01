@@ -36,6 +36,10 @@ class CmdLineReader:
         lastOptionName = None
         for arg in sys.argv:
 
+            if len(self.trailArgList) != 0:
+                self.trailArgList.append(arg)
+                continue
+
             if lastOptionName != "":  # when lastOptionName == "", catching the tail args
                 argIsOption = False
                 for name, option in self.optionsBuffer.items():
@@ -57,6 +61,7 @@ class CmdLineReader:
                         print("Tail catcher triggered...")
                         self.trailArgList.append(arg)
                         lastOptionName = ""
+                        continue
 
                 if len(self.optionsBuffer[lastOptionName]["possibleValues"]) != 0:
                     if arg not in self.optionsBuffer[lastOptionName]["possibleValues"]:

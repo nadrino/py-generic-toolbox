@@ -57,8 +57,6 @@ class CmdLineReader:
                         print("Tail catcher triggered...")
                         self.trailArgList.append(arg)
                         lastOptionName = ""
-                        self.optionsBuffer[lastOptionName]["isTriggered"] = True
-                        self.optionsBuffer[lastOptionName]["values"].append(arg)
 
                 if len(self.optionsBuffer[lastOptionName]["possibleValues"]) != 0:
                     if arg not in self.optionsBuffer[lastOptionName]["possibleValues"]:

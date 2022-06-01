@@ -33,6 +33,7 @@ class CmdLineReader:
                 option["possibleValues"]))
 
     def printTriggerArgs(self):
+        print("Triggered options are:")
         for name, option in self.optionsBuffer.items():
             if option["isTriggered"]:
                 if option["nArgs"] == 0:
@@ -60,7 +61,7 @@ class CmdLineReader:
                 if argIsOption: continue
 
             if lastOptionName is not None:
-                if self.optionsBuffer[lastOptionName]["nArgs"] != -1 \
+                if self.optionsBuffer[lastOptionName]["nArgs"] > 0 \
                         and len(self.optionsBuffer[lastOptionName]["values"]) \
                         >= self.optionsBuffer[lastOptionName]["nArgs"]:
                     if not self.keepTailArgs:

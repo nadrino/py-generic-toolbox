@@ -49,16 +49,16 @@ class CmdLineReader:
                 self.trailArgList.append(arg)
                 continue
 
-            if lastOptionName != "":  # when lastOptionName == "", catching the tail args
-                argIsOption = False
-                for name, option in self.optionsBuffer.items():
+            argIsOption = False
+            for name, option in self.optionsBuffer.items():
+                if argIsOption: break
+                for call in option["calls"]:
                     if argIsOption: break
-                    for call in option["calls"]:
-                        if argIsOption: break
-                        if arg == call:
-                            lastOptionName = name
-                            argIsOption = True
-                if argIsOption: continue
+                    if arg == call:
+                        lastOptionName = name
+                        self.optionsBuffer[name]["isTriggered"] = True
+                        argIsOption = True
+            if argIsOption: continue
 
             if lastOptionName is not None:
                 if 0 < self.optionsBuffer[lastOptionName]["nArgs"] <= len(self.optionsBuffer[lastOptionName]["values"]):

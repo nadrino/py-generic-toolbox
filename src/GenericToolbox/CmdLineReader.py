@@ -32,6 +32,14 @@ class CmdLineReader:
             print("Option: \"" + name + "\": " + str(option["calls"]) + " " + str(option["description"]) + " -> " + str(
                 option["possibleValues"]))
 
+    def printTriggerArgs(self):
+        for name, option in self.optionsBuffer.items():
+            if option["isTriggered"]:
+                if option["nArgs"] == 0:
+                    print("\"" + name + "\": True")
+                else:
+                    print("\"" + name + "\": " + self.getOptionValues(name))
+
     def readCommandLineArgs(self):
         lastOptionName = None
         for arg in sys.argv:

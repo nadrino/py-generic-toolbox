@@ -40,6 +40,8 @@ class CmdLineReader:
                     print("\"" + name + "\": True")
                 else:
                     print("\"" + name + "\": " + str(self.getOptionValues(name)))
+        if self.keepTailArgs:
+            print("Trailing args: " + str(self.trailArgList))
 
     def readCommandLineArgs(self):
         lastOptionName = None
@@ -56,12 +58,13 @@ class CmdLineReader:
                     if argIsOption: break
                     if arg == call:
                         lastOptionName = name
-                        self.optionsBuffer[name]["isTriggered"] = True
                         argIsOption = True
-            if argIsOption: continue
+            if argIsOption:
+                self.optionsBuffer[lastOptionName]["isTriggered"] = True
+                continue
 
             if lastOptionName is not None:
-                if 0 < self.optionsBuffer[lastOptionName]["nArgs"] <= len(self.optionsBuffer[lastOptionName]["values"]):
+                if self.optionsBuffer[lastOptionName]["nArgs"] <= len(self.optionsBuffer[lastOptionName]["values"]):
                     if not self.keepTailArgs:
                         raise ValueError("Too many options provided")
                     else:

@@ -38,7 +38,7 @@ class CmdLineReader:
                 if option["nArgs"] == 0:
                     print("\"" + name + "\": True")
                 else:
-                    print("\"" + name + "\": " + self.getOptionValues(name))
+                    print("\"" + name + "\": " + str(self.getOptionValues(name)))
 
     def readCommandLineArgs(self):
         lastOptionName = None

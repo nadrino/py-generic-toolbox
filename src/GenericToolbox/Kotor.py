@@ -3,9 +3,9 @@
 
 import platform
 
-import Parallel as tParallel
-import IO as tIO
-import Colors as tColors
+import GenericToolbox.Parallel as tParallel
+import GenericToolbox.IO as tIO
+import GenericToolbox.Colors as tColors
 
 
 class KotorExtractor():
@@ -24,6 +24,7 @@ class KotorExtractor():
             'macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/"
         self.pathToK2Dict['Windows'] = "/mnt/d/Games/GOG/Star Wars - KotOR2/"
         self.pathToK2Dict['XBox'] = "/Volumes/Adrien 8To EHD/Jeux/XBox/Jeux/Star Wars - Knights of the Old Republic 2/"
+        self.pathToK2Dict['Switch'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor2_Switch"
 
         self.debug = False
         self.currentPlatform = "macOS"
@@ -347,10 +348,12 @@ class KotorExtractor():
 
         unfolded_path = self.getOutputDirPath("unfolded") + '/'
         files_list = tIO.getListOfFilesInSubFolders(unfolded_path, 'tpc')
+        # also converting tpc files from override
+        files_list += tIO.getListOfFilesInSubFolders(self.getCurrentPathToKotor(), 'tpc')
+        print(files_list)
 
         def process(file_path):
-            out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[
-                0]
+            out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[0]
             out_filename = tIO.splitFileNameAndFolderPath(file_path)[1]
             out_filepath = out_folder + "/" + out_filename + ".tga"
             if os.path.isfile(out_filepath):
@@ -371,10 +374,10 @@ class KotorExtractor():
 
         print(tColors.warning + "Moving .tga files...")
         files_list = tIO.getListOfFilesInSubFolders(unfolded_path, 'tga')
+        files_list += tIO.getListOfFilesInSubFolders(self.getCurrentPathToKotor(), 'tga')
 
         def process(file_path):
-            out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[
-                0]
+            out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[0]
             out_filename = tIO.splitFileNameAndFolderPath(file_path)[1]
             out_filepath = out_folder + "/" + out_filename
             if os.path.isfile(out_filepath):
@@ -388,6 +391,7 @@ class KotorExtractor():
             os.system(command_line)
 
         tParallel.runParallel(process, files_list)
+
 
     def convert_2da_files_kotor(self):
         from tqdm import tqdm

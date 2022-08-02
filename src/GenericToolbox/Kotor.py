@@ -12,17 +12,15 @@ class KotorExtractor():
 
     def __init__(self):
         self.pathToK1Dict = dict()
-        self.pathToK1Dict[
-            'macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets/"
-        self.pathToK1Dict['Windows'] = "/mnt/d/Games/GOG/Star Wars - KotOR/"
+        self.pathToK1Dict['macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets"
+        self.pathToK1Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic/swkotor"
         self.pathToK1Dict['XBox'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor_XBox"
         self.pathToK1Dict['Switch'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor_Switch"
         self.pathToK1Dict['iOS'] = "/Users/ablanche/Documents/Kotor/iOS/KOTOR.app/"
 
         self.pathToK2Dict = dict()
-        self.pathToK2Dict[
-            'macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/"
-        self.pathToK2Dict['Windows'] = "/mnt/d/Games/GOG/Star Wars - KotOR2/"
+        self.pathToK2Dict['macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/"
+        self.pathToK2Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic 2/Steam/Knights of the Old Republic II"
         self.pathToK2Dict['XBox'] = "/Volumes/Adrien 8To EHD/Jeux/XBox/Jeux/Star Wars - Knights of the Old Republic 2/"
         self.pathToK2Dict['Switch'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor2_Switch"
 
@@ -30,11 +28,12 @@ class KotorExtractor():
         self.currentPlatform = "macOS"
         self.currentKotorGame = "kotor1"
 
-    def getOutputDirPath(self, name_):
+        self.outputLocation = "./out"
         if platform.system() == "Darwin":
-            return "/Users/ablanche/Desktop/temp/kotor_extraction_tools/" + name_ + "/" + self.currentPlatform + "/" + self.currentKotorGame + "/"
-        else:
-            return "./out/" + name_ + "/" + self.currentPlatform + "/" + self.currentKotorGame + "/"
+            self.outputLocation = "/Users/ablanche/Desktop/temp/kotor_extraction_tools"
+
+    def getOutputDirPath(self, name_):
+        return self.outputLocation + "/" + name_ + "/" + self.currentPlatform + "/" + self.currentKotorGame + "/"
 
     def getCurrentPathToKotor(self):
         if self.currentKotorGame == "kotor1":
@@ -346,13 +345,9 @@ class KotorExtractor():
 
         print(tColors.warning + "Converting .tpc files...")
 
-        unfolded_path = self.getOutputDirPath("unfolded") + '/'
-        files_list = tIO.getListOfFilesInSubFolders(unfolded_path, 'tpc')
-        # also converting tpc files from override
-        files_list += tIO.getListOfFilesInSubFolders(self.getCurrentPathToKotor(), 'tpc')
-        print(files_list)
+        sourceFolder = ''
 
-        def process(file_path):
+        def convertTpc(file_path):
             out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[0]
             out_filename = tIO.splitFileNameAndFolderPath(file_path)[1]
             out_filepath = out_folder + "/" + out_filename + ".tga"
@@ -361,8 +356,12 @@ class KotorExtractor():
 
             os.system("mkdir -p " + out_folder)
 
-            command_line = "xoreostex2tga " + unfolded_path + "/" + file_path
-            command_line += " " + out_filepath
+            cmd = list()
+            cmd.append("xoreostex2tga")
+            cmd.append(sourceFolder + "/" + file_path)
+            cmd.append(out_filepath)
+
+            command_line = " ".join(cmd)
 
             if self.debug:
                 print(command_line)
@@ -370,27 +369,42 @@ class KotorExtractor():
             else:
                 os.system(command_line + " > /dev/null 2>&1")
 
-        tParallel.runParallel(process, files_list)
+        sourceFolder = self.getOutputDirPath("unfolded")
+        files_list = tIO.getListOfFilesInSubFolders(
+            sourceFolder, 'tpc'
+            , nameExclude_=["swpc_tex_tpb.erf", "swpc_tex_tpc.erf"]  # don't process the identical low res textures
+        )
+        tParallel.runParallel(convertTpc, files_list)
 
-        print(tColors.warning + "Moving .tga files...")
-        files_list = tIO.getListOfFilesInSubFolders(unfolded_path, 'tga')
-        files_list += tIO.getListOfFilesInSubFolders(self.getCurrentPathToKotor(), 'tga')
+        # also converting tpc files from override
+        sourceFolder = self.getCurrentPathToKotor()
+        files_list = tIO.getListOfFilesInSubFolders(sourceFolder, 'tpc')
+        tParallel.runParallel(convertTpc, files_list)
 
-        def process(file_path):
+
+        print(tColors.warning, "Moving .tga files...")
+
+        def mvTga(file_path):
             out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[0]
             out_filename = tIO.splitFileNameAndFolderPath(file_path)[1]
             out_filepath = out_folder + "/" + out_filename
             if os.path.isfile(out_filepath):
-                os.system("rm \"" + unfolded_path + "/" + file_path + "\"")
+                os.system("rm \"" + sourceFolder + "/" + file_path + "\"")
                 return
 
             os.system("mkdir -p " + out_folder)
 
-            command_line = "mv " + "\"" + unfolded_path + "/" + file_path + "\""
+            command_line = "mv " + "\"" + sourceFolder + "/" + file_path + "\""
             command_line += " " + "\"" + out_filepath + "\""
             os.system(command_line)
 
-        tParallel.runParallel(process, files_list)
+        sourceFolder = self.getOutputDirPath("unfolded")
+        files_list = tIO.getListOfFilesInSubFolders(sourceFolder, 'tga')
+        tParallel.runParallel(mvTga, files_list)
+
+        sourceFolder = self.getCurrentPathToKotor()
+        files_list = tIO.getListOfFilesInSubFolders(sourceFolder, 'tga')
+        tParallel.runParallel(mvTga, files_list)
 
 
     def convert_2da_files_kotor(self):

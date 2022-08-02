@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False):
+def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExclude_=None):
+    if nameExclude_ is None:
+        nameExclude_ = list()
     import os
     files_list = list()
     inputFolder_ = inputFolder_.replace('\ ', ' ')
@@ -10,6 +12,16 @@ def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', k
     for path, subDirs, files in os.walk(inputFolder_):
         for name in files:
             file_path = os.path.join(path, name)
+
+            if nameExclude_ != None:
+                skip = False
+                for exclusion in nameExclude_:
+                    if exclusion in file_path:
+                        skip = True
+                        break
+                if skip:
+                    continue
+
             if (extension_ == '' or file_path.split('.')[-1] == extension_) \
                     and (nameCondition_ == '' or nameCondition_ in file_path):
                 index_shift = 0

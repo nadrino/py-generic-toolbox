@@ -14,8 +14,8 @@ purpleColor = "\033[1;35m"
 
 # Colored message
 
-error = redColor + "<Error>" + resetColor + " "
-info = greenColor + "<Info>" + resetColor + " "
-warning = goldColor + "<Warning>" + resetColor + " "
-special = blueColor + "<Special>" + resetColor + " "
-alert = purpleColor + "<Alert>" + resetColor + " "
+error = redColor + "<Error>" + resetColor
+info = greenColor + "<Info>" + resetColor
+warning = goldColor + "<Warning>" + resetColor
+special = blueColor + "<Special>" + resetColor
+alert = purpleColor + "<Alert>" + resetColor

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import platform
+import shutil
+import subprocess
 
 import GenericToolbox.Parallel as tParallel
 import GenericToolbox.IO as tIO
@@ -13,14 +15,14 @@ class KotorExtractor():
     def __init__(self):
         self.pathToK1Dict = dict()
         self.pathToK1Dict['macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets"
-        self.pathToK1Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic/swkotor"
+        self.pathToK1Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic/SteamVersion/swkotor"
         self.pathToK1Dict['XBox'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor_XBox"
         self.pathToK1Dict['Switch'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor_Switch"
         self.pathToK1Dict['iOS'] = "/Users/ablanche/Documents/Kotor/iOS/KOTOR.app/"
 
         self.pathToK2Dict = dict()
         self.pathToK2Dict['macOS'] = "/Users/ablanche/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/"
-        self.pathToK2Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic 2/Steam/Knights of the Old Republic II"
+        self.pathToK2Dict['Windows'] = "/Volumes/Adrien 10To EHD/Jeux/Windows/6th Generation - Mature 3D (2000+)/Star Wars - Knights of the Old Republic 2/SteamVersion/Knights of the Old Republic II"
         self.pathToK2Dict['XBox'] = "/Volumes/Adrien 8To EHD/Jeux/XBox/Jeux/Star Wars - Knights of the Old Republic 2/"
         self.pathToK2Dict['Switch'] = "/Users/ablanche/Desktop/temp/kotor_extraction_tools/kotor2_Switch"
 
@@ -263,11 +265,7 @@ class KotorExtractor():
 
             command_line = list()
             if self.currentPlatform == "XBox":
-                command_line.append("cp")
-                command_line.append("\"" + self.getCurrentPathToKotor() + "/" + file_path + "\"")
-                command_line.append("\"" + out_file_path + "\"")
-                command_line.append("&>")
-                command_line.append("/dev/null")
+                shutil.copy2(self.getCurrentPathToKotor() + "/" + file_path, out_file_path)
             else:
                 command_line.append("sfk partcopy")
                 command_line.append("\"" + self.getCurrentPathToKotor() + "/" + file_path + "\"")
@@ -277,9 +275,11 @@ class KotorExtractor():
                 command_line.append("&>")
                 command_line.append("/dev/null")
 
-            if self.debug:
-                print(" ".join(command_line))
-            os.system(" ".join(command_line))
+                if self.debug: print(" ".join(command_line))
+                # os.system(" ".join(command_line))
+                subprocess.call(" ".join(command_line), shell=True)
+
+
 
         tParallel.runParallel(process, files_list)
 
@@ -298,16 +298,8 @@ class KotorExtractor():
                 return
 
             os.system("mkdir -p " + out_folder_path)
+            shutil.copy2(unfolded_path + "/" + file_path, out_file_path)
 
-            command_line = list()
-            command_line.append("cp")
-            command_line.append("\"" + unfolded_path + "/" + file_path + "\"")
-            command_line.append("\"" + out_file_path + "\"")
-            # command_line.append("&>")
-            # command_line.append("/dev/null")
-            if self.debug:
-                print(" ".join(command_line))
-            os.system(" ".join(command_line))
 
         tParallel.runParallel(process, files_list)
 
@@ -381,8 +373,8 @@ class KotorExtractor():
         files_list = tIO.getListOfFilesInSubFolders(sourceFolder, 'tpc')
         tParallel.runParallel(convertTpc, files_list)
 
-
         print(tColors.warning, "Moving .tga files...")
+        copyMove = False
 
         def mvTga(file_path):
             out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[0]
@@ -394,7 +386,11 @@ class KotorExtractor():
 
             os.system("mkdir -p " + out_folder)
 
-            command_line = "mv " + "\"" + sourceFolder + "/" + file_path + "\""
+            command_line = "mv "
+            if copyMove:
+                command_line = "cp "
+
+            command_line += "\"" + sourceFolder + "/" + file_path + "\""
             command_line += " " + "\"" + out_filepath + "\""
             os.system(command_line)
 
@@ -404,6 +400,7 @@ class KotorExtractor():
 
         sourceFolder = self.getCurrentPathToKotor()
         files_list = tIO.getListOfFilesInSubFolders(sourceFolder, 'tga')
+        copyMove = True
         tParallel.runParallel(mvTga, files_list)
 
 
@@ -571,6 +568,7 @@ class KotorExtractor():
 
         print(tColors.warning + "copying .lyt files...")
         files_list = tIO.getListOfFilesInSubFolders(unfolded_path, 'lyt')
+
         for file_path in tqdm(files_list):
             out_folder = self.getOutputDirPath("extracted") + tIO.splitFileNameAndFolderPath(file_path)[
                 0]

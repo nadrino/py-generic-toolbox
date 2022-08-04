@@ -8,14 +8,16 @@ resetColor = "\033[00m"
 goldColor = "\033[1;33m"
 redColor = "\033[1;31m"
 greenColor = "\033[1;32m"
-blueColor = "\033[1;34m"
+blueColor = "\x1b[94m"
 purpleColor = "\033[1;35m"
+lightBlueColor = "\x1b[36m"
 
 
 # Colored message
 
 error = redColor + "<Error>" + resetColor
-info = greenColor + "<Info>" + resetColor
-warning = goldColor + "<Warning>" + resetColor
-special = blueColor + "<Special>" + resetColor
 alert = purpleColor + "<Alert>" + resetColor
+warning = goldColor + "<Warning>" + resetColor
+info = greenColor + "<Info>" + resetColor
+debug = blueColor + "<Debug>" + resetColor
+trace = blueColor + "<Trace>" + resetColor

@@ -2,34 +2,70 @@
 # -*- coding: utf-8 -*-
 
 
-def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExclude_=None):
-    if nameExclude_ is None:
-        nameExclude_ = list()
+def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExclude_=None,
+                               includeHiddenFolders_=False, includeHiddenFiles_=False):
     import os
-    files_list = list()
-    inputFolder_ = inputFolder_.replace('\ ', ' ')
 
-    for path, subDirs, files in os.walk(inputFolder_):
-        for name in files:
-            file_path = os.path.join(path, name)
+    output = getListOfFilesInFolder(inputFolder_, extension_=extension_, nameCondition_=nameCondition_,
+                                    keepFullPath_=keepFullPath_, nameExcludeList_=nameExclude_,
+                                    includeHidden_=includeHiddenFiles_)
 
-            if nameExclude_ != None:
-                skip = False
-                for exclusion in nameExclude_:
-                    if exclusion in file_path:
-                        skip = True
-                        break
-                if skip:
-                    continue
+    for subFolder in getListOfFoldersInFolder(inputFolder_, keepFullPath_=False, includeHidden_=includeHiddenFolders_):
+        subFilesList = getListOfFilesInSubFolders(inputFolder_ + "/" + subFolder, extension_=extension_, nameCondition_=nameCondition_,
+                                             keepFullPath_=False, nameExclude_=nameExclude_,
+                                             includeHiddenFolders_=includeHiddenFolders_,
+                                             includeHiddenFiles_=includeHiddenFiles_)
+        for iFile in range(len(subFilesList)):
+            if keepFullPath_:
+                subFilesList[iFile] = os.path.join(os.path.join(inputFolder_, subFolder), subFilesList[iFile])
+            else:
+                subFilesList[iFile] = os.path.join(subFolder, subFilesList[iFile])
+        output += subFilesList
 
-            if (extension_ == '' or file_path.split('.')[-1] == extension_) \
-                    and (nameCondition_ == '' or nameCondition_ in file_path):
-                index_shift = 0
-                if not keepFullPath_:
-                    index_shift = len(inputFolder_)
-                files_list.append(file_path[index_shift:])
+    return output
 
-    return files_list
+
+def getListOfFilesInFolder(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExcludeList_=None,
+                           includeHidden_=False):
+    import os
+    try:
+        return sorted([
+            ( os.path.join(inputFolder_, f) if keepFullPath_ else f ) for f in os.listdir(inputFolder_)
+            if (
+                    os.path.isfile(os.path.join(inputFolder_, f))
+                    and (extension_ == '' or os.path.splitext(f)[1] == "."+extension_)
+                    and (nameCondition_ == '' or nameCondition_ in f)
+                    and (nameExcludeList_ == None or any(nameExclude not in f for nameExclude in nameExcludeList_) )
+                    and (includeHidden_ == True or f[0] != '.')
+               )
+                ])
+    except FileNotFoundError as error:
+        return list()
+
+
+def getListOfFoldersInFolder(inputFolder_, nameCondition_='', keepFullPath_=False, nameExcludeList_=None,
+                             includeHidden_=False):
+    import os
+    try:
+        return sorted([
+            (os.path.join(inputFolder_, folderNameCandidate) if keepFullPath_ else folderNameCandidate)
+            for folderNameCandidate in os.listdir(inputFolder_)
+            if (
+                    os.path.isdir(os.path.join(inputFolder_, folderNameCandidate))
+                    and (nameCondition_ == '' or nameCondition_ in folderNameCandidate)
+                    and (nameExcludeList_ == None or any(nameExclude not in folderNameCandidate for nameExclude in nameExcludeList_) )
+                    and (includeHidden_ == True or folderNameCandidate[0] != '.')
+               )
+                ])
+    except FileNotFoundError as error:
+        return list()
+
+
+def dumpFileLinesToList(filePath_):
+    with open(filePath_) as file:
+        lines = file.readlines()
+        return [line.rstrip() for line in lines]
+
 
 def splitFileNameAndFolderPath(filePath_):
     import os

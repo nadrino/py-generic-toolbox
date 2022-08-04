@@ -1030,3 +1030,63 @@ class dlgReader():
         for global_index in range(self.global_adjacency_matrix.shape[0]):
             label_indexes.append(self.get_text_from_global_index(global_index))
         return label_indexes
+
+
+def dec_byte(data, size=1, littleEndian=True):
+    """Decode some data from bytes.
+
+    Args:
+        data (bytes): data to decode
+        size (int): number of bites of the data
+        littleEndian (bool): little endian or big endian
+
+    Returns:
+        int: the decoded data
+    """
+    order = str('<' if littleEndian else '>')
+    format_ = str((None, 'B', 'H', None, 'I')[size])
+
+    from struct import unpack
+    return unpack(order + format_, data)[0]
+
+
+class TgaHeader:
+
+    def __init__(self, file_name):
+        with open(file_name, "rb") as image_file:
+            # Check footer
+            image_file.seek(-26, 2)
+            self.extension_area_offset = dec_byte(
+                image_file.read(4), 4)
+            self.developer_directory_offset = dec_byte(
+                image_file.read(4), 4)
+            signature = image_file.read(16)
+            dot = image_file.read(1)
+            zero = dec_byte(image_file.read(1))
+
+            if signature == "TRUEVISION-XFILE".encode('ascii') and\
+                    dot == ".".encode('ascii') and zero == 0:
+                self.__new_TGA_format = True
+            else:
+                self.__new_TGA_format = False
+
+            # Read Header
+            image_file.seek(0)
+            # ID LENGTH
+            self.id_length = dec_byte(image_file.read(1))
+            # COLOR MAP TYPE
+            self.color_map_type = dec_byte(image_file.read(1))
+            # IMAGE TYPE
+            self.image_type = dec_byte(image_file.read(1))
+            # COLOR MAP SPECIFICATION
+            self.first_entry_index = dec_byte(image_file.read(2), 2)
+            self.color_map_length = dec_byte(image_file.read(2), 2)
+            self.color_map_entry_size = dec_byte(image_file.read(1))
+            # IMAGE SPECIFICATION
+            self.x_origin = dec_byte(image_file.read(2), 2)
+            self.y_origin = dec_byte(image_file.read(2), 2)
+            self.image_width = dec_byte(image_file.read(2), 2)
+            self.image_height = dec_byte(image_file.read(2), 2)
+            self.pixel_depht = dec_byte(image_file.read(1))
+            self.image_descriptor = dec_byte(image_file.read(1))
+            self._first_pixel = self.image_descriptor

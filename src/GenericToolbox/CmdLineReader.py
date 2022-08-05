@@ -29,8 +29,8 @@ class CmdLineReader:
     def printConfigSummary(self):
         print("Keeping trailing args? " + str(self.keepTailArgs))
         for name, option in self.optionsBuffer.items():
-            print("Option: \"" + name + "\": " + str(option["calls"]) + " " + str(option["description"]) + " -> " + str(
-                option["possibleValues"]))
+            print("Option:", "\""+name+"\":", str(option["calls"]), str(option["description"]),
+                  "allowed:" + str(option["possibleValues"]) if len(option["possibleValues"]) > 0 else "")
 
     def printTriggerArgs(self):
         print("Triggered options are:")

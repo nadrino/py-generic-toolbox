@@ -64,7 +64,7 @@ class CmdLineReader:
                 continue
 
             if lastOptionName is not None:
-                if self.optionsBuffer[lastOptionName]["nArgs"] <= len(self.optionsBuffer[lastOptionName]["values"]):
+                if self.optionsBuffer[lastOptionName]["nArgs"] != -1 and self.optionsBuffer[lastOptionName]["nArgs"] <= len(self.optionsBuffer[lastOptionName]["values"]):
                     if not self.keepTailArgs:
                         raise ValueError("Too many options provided")
                     else:

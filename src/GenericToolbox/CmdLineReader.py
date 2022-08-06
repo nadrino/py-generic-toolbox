@@ -32,7 +32,7 @@ class CmdLineReader:
             print("Option:", "\""+name+"\":", str(option["calls"]), str(option["description"]),
                   "allowed:" + str(option["possibleValues"]) if len(option["possibleValues"]) > 0 else "")
 
-    def printTriggerArgs(self):
+    def printTriggeredArgs(self):
         print("Triggered options are:")
         for name, option in self.optionsBuffer.items():
             if option["isTriggered"]:

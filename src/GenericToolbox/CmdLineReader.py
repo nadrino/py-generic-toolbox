@@ -85,7 +85,13 @@ class CmdLineReader:
             if option["isMandatory"] and not option["isTriggered"]:
                 raise ValueError(name + " option not triggered.")
 
-        if len( self.optionsBuffer ) == 0 and self.keepTailArgs:
+        optionsAreTrigged = False
+        for opt in self.optionsBuffer:
+            if opt["isTriggered"]:
+                optionsAreTrigged = True
+                break
+
+        if not optionsAreTrigged and self.keepTailArgs:
             for arg in sys.argv:
                 self.trailArgList.append(arg)
 

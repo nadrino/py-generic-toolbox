@@ -89,7 +89,11 @@ class CmdLineReader:
                 optionsAreTrigged = True
 
         if not optionsAreTrigged and self.keepTailArgs:
+            isFirst=True
             for arg in sys.argv:
+                if isFirst:
+                    isFirst=False
+                    continue
                 self.trailArgList.append(arg)
 
 

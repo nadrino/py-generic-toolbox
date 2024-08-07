@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 
+def printIf(condition_, *args, sep=' ', end='\n', file=None):
+    if condition_:
+        print(*args, sep=sep, end=end, file=file)
+
+
 def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExclude_=None,
                                includeHiddenFolders_=False, includeHiddenFiles_=False):
     import os

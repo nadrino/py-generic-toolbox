@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import shutil
+
 
 def printIf(condition_, *args, sep=' ', end='\n', file=None):
     if condition_:
         print(*args, sep=sep, end=end, file=file)
 
 
+def copyFile(src_, dst_):
+    if not os.path.exists(dst_) and not os.path.exists( os.path.join(dst_, os.path.basename(src_))):
+        return
+    shutil.copy2(src_, dst_)
+
+
 def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExclude_=None,
                                includeHiddenFolders_=False, includeHiddenFiles_=False):
-    import os
+    
 
     output = getListOfFilesInFolder(inputFolder_, extension_=extension_, nameCondition_=nameCondition_,
                                     keepFullPath_=keepFullPath_, nameExcludeList_=nameExclude_,
@@ -32,7 +41,7 @@ def getListOfFilesInSubFolders(inputFolder_, extension_='', nameCondition_='', k
 
 def getListOfFilesInFolder(inputFolder_, extension_='', nameCondition_='', keepFullPath_=False, nameExcludeList_=None,
                            includeHidden_=False):
-    import os
+    
     try:
         return sorted([
             ( os.path.join(inputFolder_, f) if keepFullPath_ else f ) for f in os.listdir(inputFolder_)
@@ -50,7 +59,7 @@ def getListOfFilesInFolder(inputFolder_, extension_='', nameCondition_='', keepF
 
 def getListOfFoldersInFolder(inputFolder_, nameCondition_='', keepFullPath_=False, nameExcludeList_=None,
                              includeHidden_=False):
-    import os
+    
     try:
         return sorted([
             (os.path.join(inputFolder_, folderNameCandidate) if keepFullPath_ else folderNameCandidate)
@@ -73,7 +82,7 @@ def dumpFileLinesToList(filePath_):
 
 
 def splitFileNameAndFolderPath(filePath_):
-    import os
+    
 
     if os.name == 'nt':
         splited_string = filePath_.split('\\')
@@ -87,7 +96,7 @@ def splitFileNameAndFolderPath(filePath_):
     return folder_path, file_name
 
 def mkdir(directory_path):
-    import os
+    
 
     if os.path.isdir(directory_path):
         pass
@@ -99,14 +108,14 @@ def mkdir(directory_path):
         if directory: os.mkdir(directory_path)
 
 def ls(input_path_):
-    import os
+    
 
     if input_path_[0] != '/':
         input_path_ = os.getcwd() + '/' + input_path_
     return os.popen('cd ' + os.getcwd() + ' && ls ' + input_path_).read().split('\n')[:-1]
 
 def get_list_of_files_in_folder(input_folder_, extension_='', name_format_=''):
-    import os
+    
 
     files_list = list()
     input_folder_ = input_folder_.replace('\ ', ' ')
@@ -149,7 +158,7 @@ def transcriptAudio(wav_file_path_, algorithm_='google'):
                 print('Sphinx error: {0}'.format(str(e)))
 
 def isEnvVarDefined(env_variable_):
-    import os
+    
     return (env_variable_ in os.environ)
 
 def get_env_variable(env_variable_):
@@ -158,11 +167,11 @@ def get_env_variable(env_variable_):
         print("Env variable has not been set: " + str(env_variable_))
         sys.exit(1)
     else:
-        import os
+        
         return os.environ.get(env_variable_)
 
 def get_current_os():
-    import os
+    
 
     current_os = str()
 
@@ -177,7 +186,7 @@ def get_current_os():
     return current_os
 
 def getTerminalSize():
-    import os
+    
 
     env = os.environ
 

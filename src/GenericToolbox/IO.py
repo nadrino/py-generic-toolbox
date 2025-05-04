@@ -11,7 +11,7 @@ def printIf(condition_, *args, sep=' ', end='\n', file=None):
 
 
 def copyFile(src_, dst_):
-    if not os.path.exists(dst_) and not os.path.exists( os.path.join(dst_, os.path.basename(src_))):
+    if os.path.exists(dst_) or os.path.exists(os.path.join(dst_, os.path.basename(src_))):
         return
     shutil.copy2(src_, dst_)
 

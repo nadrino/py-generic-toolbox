@@ -8,7 +8,6 @@ nbThreads = 1
 def runParallel(function_, listToProcess_):
     from tqdm import tqdm
     from multiprocessing.dummy import Pool as ThreadPool
-    from multiprocessing import cpu_count
 
     global nbThreads
 

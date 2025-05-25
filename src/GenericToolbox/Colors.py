@@ -15,9 +15,9 @@ lightBlueColor = "\x1b[36m"
 
 # Colored message
 
-error = redColor + "<Error>" + resetColor
-alert = purpleColor + "<Alert>" + resetColor
-warning = goldColor + "<Warning>" + resetColor
-info = greenColor + "<Info>" + resetColor
-debug = blueColor + "<Debug>" + resetColor
-trace = blueColor + "<Trace>" + resetColor
+error = f'{redColor}ERROR{resetColor}:'
+alert = f'{purpleColor}ALERT{resetColor}:'
+warning = f'{goldColor} WARN{resetColor}:'
+info = f'{greenColor} INFO{resetColor}:'
+debug = f'{blueColor}DEBUG{resetColor}:'
+trace = f'{lightBlueColor}TRACE{resetColor}:'
